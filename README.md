@@ -53,9 +53,8 @@ seguintes informações:
 
 ```json
 {
-  "name": "nomeDoUsuário",
-  "email": "emailDoUsuário",
-  "password": "senhaDoUsuário"
+  "nome": "nomeDoUsuário",
+  "senha": "senhaDoUsuário"
 }
 ```
 
@@ -64,8 +63,8 @@ demais endpoints. A autenticação requer um JSON body com as seguintes informa�
 
 ```json
 {
-  "email": "emailDoUsuário",
-  "password": "senhaDoUsuário"
+  "nome": "emailDoUsuário",
+  "senha": "senhaDoUsuário"
 }
 ```
 
