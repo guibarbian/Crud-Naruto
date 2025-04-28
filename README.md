@@ -26,8 +26,8 @@ Este é um CRUD simples de batalha Ninja
 
 1. Copie o repositório
 ```bash
-git clone https://github.com/guibarbian/Security-Crud
-cd Security-Crud
+git clone https://github.com/guibarbian/Crud-Naruto
+cd Crud-Naruto
 ```
 2. Instale as dependências
 ```bash
