@@ -15,6 +15,7 @@ Este é um CRUD simples de batalha Ninja
 - **Maven** - Gerenciador de dependências
 - **JUnit** - Para testes unitários
 - **MockMVC** - Para testes de integração
+- **Docker** - Para containerização da aplicação e do banco de dados
 
 ## Pré-requisitos
 
@@ -63,7 +64,7 @@ demais endpoints. A autenticação requer um JSON body com as seguintes informa�
 
 ```json
 {
-  "nome": "emailDoUsuário",
+  "nome": "nomeDoUsuário",
   "senha": "senhaDoUsuário"
 }
 ```

@@ -5,6 +5,7 @@ import com.db.crud_naruto.DTO.auth.AuthenticationResponse;
 import com.db.crud_naruto.DTO.auth.RegisterDTO;
 import com.db.crud_naruto.infra.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +21,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterDTO dto){
-        return ResponseEntity.ok(authenticationService.register(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(authenticationService.register(dto));
     }
 
     @PostMapping("/login")

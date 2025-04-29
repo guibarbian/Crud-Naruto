@@ -4,6 +4,7 @@ import com.db.crud_naruto.DTO.auth.AuthenticationDTO;
 import com.db.crud_naruto.DTO.auth.AuthenticationResponse;
 import com.db.crud_naruto.DTO.auth.RegisterDTO;
 import com.db.crud_naruto.enums.Role;
+import com.db.crud_naruto.exceptions.BadRequestException;
 import com.db.crud_naruto.model.Usuario;
 import com.db.crud_naruto.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,10 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterDTO dto) {
+        if(usuarioRepository.findByNome(dto.getNome()).isPresent()){
+            throw new BadRequestException("Nome de usuário já está em uso");
+        }
+
         var usuario = Usuario.builder()
                 .nome(dto.getNome())
                 .senha(passwordEncoder.encode(dto.getSenha()))
