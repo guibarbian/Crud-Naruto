@@ -18,7 +18,7 @@ public class NinjaDeTaijutsu extends Personagem implements Ninja {
 
     @Override
     public String usarJutsu(){
-        return this.getNome() + " está atacando com Ninjutsu";
+        return this.getNome() + " está atacando com Taijutsu";
     }
 
     @Override

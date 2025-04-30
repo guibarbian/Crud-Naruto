@@ -3,7 +3,9 @@ package com.db.crud_naruto.unitario;
 import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
 import com.db.crud_naruto.exceptions.NotFoundException;
+import com.db.crud_naruto.model.NinjaDeGenjutsu;
 import com.db.crud_naruto.model.NinjaDeNinjutsu;
+import com.db.crud_naruto.model.NinjaDeTaijutsu;
 import com.db.crud_naruto.model.Personagem;
 import com.db.crud_naruto.repository.PersonagemRepository;
 import com.db.crud_naruto.service.impl.PersonagemServiceImpl;
@@ -35,9 +37,9 @@ public class PersonagemServiceTest {
 
     NinjaDeNinjutsu ninjutsu = NinjaDeNinjutsu.builder().id(1L).nome("Sasuke Uchiha").idade(16)
             .aldeia("Konoha").chakra(120).jutsus(List.of("Chidori", "Kirin")).build();
-    NinjaDeNinjutsu genjutsu = NinjaDeNinjutsu.builder().id(2L).nome("Itachi Uchiha").idade(22)
+    NinjaDeGenjutsu genjutsu = NinjaDeGenjutsu.builder().id(2L).nome("Itachi Uchiha").idade(22)
             .aldeia("Akatsuki").chakra(180).jutsus(List.of("Mangekyo Sharingan", "Amaterasu")).build();
-    NinjaDeNinjutsu taijutsu = NinjaDeNinjutsu.builder().id(3L).nome("Rock Lee").idade(16)
+    NinjaDeTaijutsu taijutsu = NinjaDeTaijutsu.builder().id(3L).nome("Rock Lee").idade(16)
             .aldeia("Konoha").chakra(100).jutsus(List.of("Lotus")).build();
 
     @Test
@@ -72,7 +74,7 @@ public class PersonagemServiceTest {
     }
 
     @Test
-    void testCreatePersonagem_Success() {
+    void testCreatePersonagemDeNinjutsu() {
         RequestPersonagemDto dto = RequestPersonagemDto.builder()
                 .nome("Sasuke Uchiha").idade(16).aldeia("Konoha")
                 .chakra(100).jutsus(List.of("Chidori", "Kirin")).especialidade("ninjutsu").build();
@@ -86,6 +88,48 @@ public class PersonagemServiceTest {
         ResponsePersonagemDto result = personagemService.createPersonagem(dto);
 
         assertEquals("Sasuke Uchiha", result.getNome());
+        assertEquals("Sasuke Uchiha está atacando com Ninjutsu", ninjutsu.usarJutsu());
+        assertEquals("Sasuke Uchiha está desviando usando suas habilidades de Ninjutsu", ninjutsu.desviar());
+        verify(personagemRepository, times(1)).save(auxNinja);
+    }
+
+    @Test
+    void testCreatePersonagemDeGenjutsu() {
+        RequestPersonagemDto dto = RequestPersonagemDto.builder()
+                .nome("Itachi Uchiha").idade(22).aldeia("Akatsuki")
+                .chakra(120).jutsus(List.of("Sharingan", "Amaterasu")).especialidade("genjutsu").build();
+
+        NinjaDeGenjutsu auxNinja = NinjaDeGenjutsu.builder()
+                .nome(dto.getNome()).idade(dto.getIdade()).aldeia(dto.getAldeia())
+                .chakra(dto.getChakra()).jutsus(dto.getJutsus()).build();
+
+        when(personagemRepository.save(auxNinja)).thenReturn(genjutsu);
+
+        ResponsePersonagemDto result = personagemService.createPersonagem(dto);
+
+        assertEquals("Itachi Uchiha", result.getNome());
+        assertEquals("Itachi Uchiha está atacando com Genjutsu", genjutsu.usarJutsu());
+        assertEquals("Itachi Uchiha está desviando usando suas habilidades de Genjutsu", genjutsu.desviar());
+        verify(personagemRepository, times(1)).save(auxNinja);
+    }
+
+    @Test
+    void testCreatePersonagemDeTaijutsu() {
+        RequestPersonagemDto dto = RequestPersonagemDto.builder()
+                .nome("Rock Lee").idade(16).aldeia("Konoha")
+                .chakra(100).jutsus(List.of("Lótus Primária")).especialidade("taijutsu").build();
+
+        NinjaDeTaijutsu auxNinja = NinjaDeTaijutsu.builder()
+                .nome(dto.getNome()).idade(dto.getIdade()).aldeia(dto.getAldeia())
+                .chakra(dto.getChakra()).jutsus(dto.getJutsus()).build();
+
+        when(personagemRepository.save(auxNinja)).thenReturn(taijutsu);
+
+        ResponsePersonagemDto result = personagemService.createPersonagem(dto);
+
+        assertEquals("Rock Lee", result.getNome());
+        assertEquals("Rock Lee está atacando com Taijutsu", taijutsu.usarJutsu());
+        assertEquals("Rock Lee está desviando usando suas habilidades de Taijutsu", taijutsu.desviar());
         verify(personagemRepository, times(1)).save(auxNinja);
     }
 

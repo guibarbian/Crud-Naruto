@@ -22,7 +22,7 @@ public class NinjaDeGenjutsu extends Personagem implements Ninja {
 
     @Override
     public String desviar(){
-        return this.getNome() + " está desviando usando suas habilidades de Taijutsu";
+        return this.getNome() + " está desviando usando suas habilidades de Genjutsu";
     }
 
     @Override

@@ -248,10 +248,4 @@ public class PersonagemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
-
-
-
-    // Você pode seguir esse mesmo padrão para os testes de:
-    // testFindAll, testFindPersonagemById, testUpdatePersonagem, testDeletePersonagem
-
 }
