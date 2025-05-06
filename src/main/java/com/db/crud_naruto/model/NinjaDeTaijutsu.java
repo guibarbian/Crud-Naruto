@@ -1,7 +1,6 @@
 package com.db.crud_naruto.model;
 
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
-import com.db.crud_naruto.interfaces.Ninja;
 
 import jakarta.persistence.Entity;
 import lombok.Data;
@@ -31,9 +30,10 @@ public class NinjaDeTaijutsu extends Personagem implements Ninja {
         return ResponsePersonagemDto.builder()
                 .id(this.getId())
                 .nome(this.getNome())
+                .vida(this.getVida())
+                .chakra(this.getChakra())
                 .idade(this.getIdade())
                 .aldeia(this.getAldeia())
-                .chakra(this.getChakra())
                 .jutsus(this.getJutsus()).build();
     }
 }

@@ -32,7 +32,7 @@ public class PersonagemControllerImpl implements PersonagemController {
     @Override
     @PostMapping
     public ResponseEntity<ResponsePersonagemDto> createPersonagem(@RequestBody RequestPersonagemDto dto) {
-        return ResponseEntity.ok(personagemService.createPersonagem(dto));
+        return ResponseEntity.status(201).body(personagemService.createPersonagem(dto));
     }
 
     @Override
@@ -45,6 +45,6 @@ public class PersonagemControllerImpl implements PersonagemController {
     @DeleteMapping("/{charId}")
     public ResponseEntity<String> deletePersonagem(@PathVariable Long charId) {
         personagemService.deletePersonagem(charId);
-        return ResponseEntity.ok("Personagem deletado com sucesso");
+        return ResponseEntity.ok().build();
     }
 }

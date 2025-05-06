@@ -3,7 +3,6 @@ package com.db.crud_naruto.integracao;
 import com.db.crud_naruto.DTO.auth.AuthenticationDTO;
 import com.db.crud_naruto.DTO.auth.RegisterDTO;
 import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
-import com.db.crud_naruto.interfaces.Ninja;
 import com.db.crud_naruto.model.NinjaDeGenjutsu;
 import com.db.crud_naruto.model.NinjaDeNinjutsu;
 import com.db.crud_naruto.repository.PersonagemRepository;
@@ -17,7 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
+import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -71,8 +70,8 @@ public class PersonagemControllerTest {
     void testFindPersonagemById() throws Exception{
         NinjaDeNinjutsu ninja = NinjaDeNinjutsu.builder()
                 .nome("Sasuke Uchiha").idade(17)
-                .aldeia("Renegado").chakra(100)
-                .jutsus(List.of("Sharingan", "Chidori")).build();
+                .aldeia("Renegado").vida(100).chakra(100)
+                .jutsus(Map.of("Chidori", 20, "Kirin", 40)).build();
 
         NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
 
@@ -82,22 +81,24 @@ public class PersonagemControllerTest {
                         .content(objectMapper.writeValueAsString(savedNinja)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nome").value("Sasuke Uchiha"))
-                .andExpect(jsonPath("$.aldeia").value("Renegado"));
+                .andExpect(jsonPath("$.aldeia").value("Renegado"))
+                .andExpect(jsonPath("$.chakra").value(100))
+                .andExpect(jsonPath("$.jutsus.['Chidori']").value(20));
     }
 
     @Test
     void testFindAllPersonagens() throws Exception {
         NinjaDeNinjutsu ninja1 = NinjaDeNinjutsu.builder()
                 .nome("Sasuke Uchiha").idade(17)
-                .aldeia("Renegado").chakra(100)
-                .jutsus(List.of("Sharingan", "Chidori")).build();
+                .aldeia("Renegado").vida(100).chakra(100)
+                .jutsus(Map.of("Chidori", 20, "Kirin", 40)).build();
 
         personagemRepository.save(ninja1);
 
         NinjaDeGenjutsu ninja2 = NinjaDeGenjutsu.builder()
                 .nome("Itachi Uchiha").idade(22)
-                .aldeia("Akatsuki").chakra(100)
-                .jutsus(List.of("Sharingan", "Amaterasu")).build();
+                .aldeia("Akatsuki").chakra(100).vida(100)
+                .jutsus(Map.of("Tsukuyomi", 40, "Shishirendan", 20)).build();
 
         personagemRepository.save(ninja2);
 
@@ -118,18 +119,19 @@ public class PersonagemControllerTest {
                 .nome("Naruto Uzumaki")
                 .idade(16)
                 .aldeia("Aldeia da Folha")
-                .chakra(100)
+                .vida(100)
                 .especialidade("Ninjutsu")
-                .jutsus(List.of("Rasengan", "Jutsu Clone das Sombras"))
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
 
         mockMvc.perform(post("/api/v1/personagens")
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(personagem)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nome").value("Naruto Uzumaki"))
-                .andExpect(jsonPath("$.aldeia").value("Aldeia da Folha"));
+                .andExpect(jsonPath("$.aldeia").value("Aldeia da Folha"))
+                .andExpect(jsonPath("$.chakra").value(100));
     }
 
     @Test
@@ -138,9 +140,9 @@ public class PersonagemControllerTest {
                 .nome("Naruto Uzumaki")
                 .idade(16)
                 .aldeia("Aldeia da Folha")
-                .chakra(100)
+                .vida(100)
                 .especialidade("NoJutsu")
-                .jutsus(List.of("Rasengan", "Jutsu Clone das Sombras"))
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
 
         mockMvc.perform(post("/api/v1/personagens")
@@ -156,9 +158,9 @@ public class PersonagemControllerTest {
                 .nome("Naruto Uzumaki")
                 .idade(16)
                 .aldeia("Aldeia da Folha")
-                .chakra(100)
+                .vida(100)
                 .especialidade("Ninjutsu")
-                .jutsus(List.of("Rasengan", "Jutsu Clone das Sombras"))
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
 
         mockMvc.perform(put("/api/v1/personagens/9999")
@@ -174,8 +176,9 @@ public class PersonagemControllerTest {
                 .nome("Naruto Uzumaki")
                 .idade(16)
                 .aldeia("Aldeia da Folha")
+                .vida(100)
                 .chakra(100)
-                .jutsus(List.of("Rasengan", "Jutsu Clone das Sombras"))
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
 
         NinjaDeNinjutsu savedNinja = personagemRepository.save(personagem);
@@ -184,9 +187,9 @@ public class PersonagemControllerTest {
                         .nome("Naruto Uzumaki")
                         .idade(17)
                         .aldeia("Aldeia da Folha")
-                        .chakra(120)
+                        .vida(120)
                         .especialidade("NoJutsu")
-                        .jutsus(List.of("Rasengan", "Jutsu Clone das Sombras")).build();
+                        .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20)).build();
 
         mockMvc.perform(put("/api/v1/personagens/" + savedNinja.getId())
                         .header("Authorization", token)
@@ -202,7 +205,8 @@ public class PersonagemControllerTest {
                 .idade(16)
                 .aldeia("Aldeia da Folha")
                 .chakra(100)
-                .jutsus(List.of("Rasengan", "Jutsu Clone das Sombras"))
+                .vida(100)
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
 
         NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
@@ -210,10 +214,10 @@ public class PersonagemControllerTest {
         RequestPersonagemDto updatedPersonagem = RequestPersonagemDto.builder()
                 .nome("Naruto Uzumaki")
                 .idade(17)
+                .vida(100)
                 .aldeia("Aldeia da Folha")
-                .chakra(120)
                 .especialidade("Ninjutsu")
-                .jutsus(List.of("Rasengan", "Jutsu Clone das Sombras", "Oodama Rasengan"))
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
 
         mockMvc.perform(put("/api/v1/personagens/" + savedNinja.getId())
@@ -222,8 +226,7 @@ public class PersonagemControllerTest {
                         .content(objectMapper.writeValueAsString(updatedPersonagem)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idade").value(17))
-                .andExpect(jsonPath("$.chakra").value(120))
-                .andExpect(jsonPath("$.jutsus[2]").value("Oodama Rasengan"));
+                .andExpect(jsonPath("$.jutsus['Rasengan']").value(40));
     }
 
     @Test
@@ -232,8 +235,9 @@ public class PersonagemControllerTest {
                 .nome("Naruto Uzumaki")
                 .idade(16)
                 .aldeia("Aldeia da Folha")
+                .vida(100)
                 .chakra(100)
-                .jutsus(List.of("Rasengan", "Jutsu Clone das Sombras"))
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
 
         NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
