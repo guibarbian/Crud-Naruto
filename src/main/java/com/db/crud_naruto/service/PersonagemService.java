@@ -15,5 +15,7 @@ public interface PersonagemService {
 
     ResponsePersonagemDto updatePersonagem(Long charId, RequestPersonagemDto dto);
 
+    ResponsePersonagemDto aprenderJutsu(Long charId, String nomeJutsu, Integer dano);
+
     void deletePersonagem(Long charId);
 }

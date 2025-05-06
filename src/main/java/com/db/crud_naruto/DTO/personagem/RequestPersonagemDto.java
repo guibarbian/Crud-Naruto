@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -14,7 +14,7 @@ public class RequestPersonagemDto {
     String nome;
     Integer idade;
     String aldeia;
-    Integer chakra;
-    List<String> jutsus;
+    Integer vida;
+    Map<String, Integer> jutsus;
     String especialidade;
 }

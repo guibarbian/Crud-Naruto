@@ -1,14 +1,14 @@
 package com.db.crud_naruto.model;
 
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
+import com.db.crud_naruto.exceptions.BadRequestException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -33,13 +33,25 @@ public abstract class Personagem {
     @Column(name = "aldeia", nullable = false)
     private String aldeia;
 
+    @Column(name = "vida", nullable = false)
+    private Integer vida;
+
     @Column(name = "chakra", nullable = false)
     private Integer chakra;
 
     @ElementCollection
     @CollectionTable(name = "personagem_jutsus", joinColumns = @JoinColumn(name = "personagem_id"))
-    @Column(name = "jutsu")
-    private List<String> jutsus = new ArrayList<>();
+    @MapKeyColumn(name = "jutsu")
+    @Column(name = "dano")
+    private Map<String, Integer> jutsus;
+
+    public void addJutsu(String nomeJutsu, Integer dano){
+        if(!jutsus.containsKey(nomeJutsu)){
+            jutsus.put(nomeJutsu, dano);
+        } else {
+            throw new BadRequestException("Ninja já tem esse jutsu!");
+        }
+    }
 
     public abstract ResponsePersonagemDto toDto();
 }

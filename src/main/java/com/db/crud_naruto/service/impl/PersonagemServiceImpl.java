@@ -2,6 +2,7 @@ package com.db.crud_naruto.service.impl;
 
 import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
+import com.db.crud_naruto.exceptions.BadRequestException;
 import com.db.crud_naruto.exceptions.NotFoundException;
 import com.db.crud_naruto.model.NinjaDeGenjutsu;
 import com.db.crud_naruto.model.NinjaDeNinjutsu;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -23,7 +25,6 @@ import java.util.Optional;
 public class PersonagemServiceImpl implements PersonagemService {
 
     private final PersonagemRepository personagemRepository;
-
 
     @Override
     public Page<ResponsePersonagemDto> findAll(Pageable pageable) {
@@ -63,8 +64,16 @@ public class PersonagemServiceImpl implements PersonagemService {
         novoPersonagem.setNome(dto.getNome());
         novoPersonagem.setIdade(dto.getIdade());
         novoPersonagem.setAldeia(dto.getAldeia());
-        novoPersonagem.setChakra(dto.getChakra());
-        novoPersonagem.setJutsus(dto.getJutsus());
+        novoPersonagem.setVida(dto.getVida());
+        novoPersonagem.setChakra(100);
+        Map<String,Integer> jutsus = dto.getJutsus();
+
+        if(jutsus.isEmpty()){
+            log.error("Ninja não foi criado pois não possui jutsus");
+            throw new BadRequestException("Ninja deve ter ao menos um Jutsu");
+        }
+
+        novoPersonagem.setJutsus(jutsus);
 
         Personagem personagemSalvo = personagemRepository.save(novoPersonagem);
         log.info("Personagem criado com ID: {}", personagemSalvo.getId());
@@ -96,13 +105,51 @@ public class PersonagemServiceImpl implements PersonagemService {
         novoPersonagem.setNome(dto.getNome());
         novoPersonagem.setIdade(dto.getIdade());
         novoPersonagem.setAldeia(dto.getAldeia());
-        novoPersonagem.setChakra(dto.getChakra());
-        novoPersonagem.setJutsus(dto.getJutsus());
+        novoPersonagem.setVida(dto.getVida());
+        novoPersonagem.setChakra(100);
+
+        Map<String,Integer> jutsus = dto.getJutsus();
+
+        if(jutsus.isEmpty()){
+            log.error("Ninja não foi atualizado pois não possui jutsus");
+            throw new BadRequestException("Ninja deve ter ao menos um Jutsu");
+        }
+
+        novoPersonagem.setJutsus(jutsus);
 
         Personagem personagemSalvo = personagemRepository.save(novoPersonagem);
         log.info("Personagem atualizado com sucesso. ID: {}", personagemSalvo.getId());
 
         return personagemSalvo.toDto();
+    }
+
+    @Override
+    public ResponsePersonagemDto aprenderJutsu(Long charId, String nomeJutsu, Integer dano) {
+        log.info("Checando se personagem com id {} existe", charId);
+        Optional<Personagem> personagemOptional = personagemRepository.findById(charId);
+
+        if(personagemOptional.isEmpty()){
+            log.error("Personagem com ID {} não encontrado", charId);
+            throw new NotFoundException("Personagem não encontrado");
+        }
+
+        log.info("Criando lista de jutsus do personagem");
+        Map<String, Integer> jutsus = personagemOptional.get().getJutsus();
+
+        if (jutsus.containsKey(nomeJutsu)){
+            log.error("Personagem já sabe o jutsu");
+            throw new BadRequestException("Personagem já sabe o jutsu");
+        }
+
+        log.info("Adicionando jutsu ao personagem");
+        jutsus.put(nomeJutsu, dano);
+
+        log.info("Criando personagem atualizado com novo jutsu");
+        Personagem personagemAtualizado = personagemOptional.get();
+        personagemAtualizado.setJutsus(jutsus);
+
+        log.info("Retornando personagem atualizado");
+        return personagemRepository.save(personagemAtualizado).toDto();
     }
 
     @Override

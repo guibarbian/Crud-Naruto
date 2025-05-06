@@ -1,4 +1,4 @@
-package com.db.crud_naruto.interfaces;
+package com.db.crud_naruto.model;
 
 public interface Ninja {
 
