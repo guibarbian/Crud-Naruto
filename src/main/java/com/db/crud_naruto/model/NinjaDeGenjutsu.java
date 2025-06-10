@@ -29,8 +29,6 @@ public class NinjaDeGenjutsu extends Personagem implements Ninja {
         return ResponsePersonagemDto.builder()
                 .id(this.getId())
                 .nome(this.getNome())
-                .idade(this.getIdade())
-                .aldeia(this.getAldeia())
                 .vida(this.getVida())
                 .chakra(this.getChakra())
                 .jutsus(this.getJutsus()).build();

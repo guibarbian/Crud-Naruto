@@ -32,8 +32,6 @@ public class NinjaDeTaijutsu extends Personagem implements Ninja {
                 .nome(this.getNome())
                 .vida(this.getVida())
                 .chakra(this.getChakra())
-                .idade(this.getIdade())
-                .aldeia(this.getAldeia())
                 .jutsus(this.getJutsus()).build();
     }
 }

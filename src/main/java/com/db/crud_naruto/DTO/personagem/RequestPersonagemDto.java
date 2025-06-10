@@ -6,15 +6,12 @@ import lombok.Data;
 
 import java.util.Map;
 
-@Data
 @Builder
-@AllArgsConstructor
-public class RequestPersonagemDto {
-
-    String nome;
-    Integer idade;
-    String aldeia;
-    Integer vida;
-    Map<String, Integer> jutsus;
-    String especialidade;
+public record RequestPersonagemDto(
+        String nome,
+        Integer vida,
+        Integer chakra,
+        Map<String, Integer> jutsus,
+        String especialidade
+) {
 }
