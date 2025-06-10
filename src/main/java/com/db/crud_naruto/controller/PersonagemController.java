@@ -1,5 +1,6 @@
 package com.db.crud_naruto.controller;
 
+import com.db.crud_naruto.DTO.personagem.AprenderJutsuDto;
 import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 
 @Tag(name = "Personagem", description = "Endpoints para manejo de personagens")
 public interface PersonagemController {
@@ -67,6 +69,21 @@ public interface PersonagemController {
             }
     )
     ResponseEntity<ResponsePersonagemDto> updatePersonagem(Long charId, RequestPersonagemDto dto);
+
+    @Operation(summary = "Aprender jutsu",
+            description = "Adiciona um jutsu à lista do personagem",
+            parameters = {
+                    @Parameter(name = "charId", description = "ID do personagem", required = true, example = "1"),
+                    @Parameter(name = "dto", description = "DTO com informações do jutsu", required = true, example = "nomeJutsu: 'Chidori', dano: 100")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Jutsu adicionado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos no body"),
+                    @ApiResponse(responseCode = "404", description = "Personagem não encontrado"),
+                    @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+            }
+    )
+    ResponseEntity<ResponsePersonagemDto> aprenderJutsu(Long charId, AprenderJutsuDto dto);
 
     @Operation(summary = "Deletar personagem por ID",
             description = "Deleta um personagem pelo ID",

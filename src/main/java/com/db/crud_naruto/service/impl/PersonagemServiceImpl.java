@@ -1,5 +1,6 @@
 package com.db.crud_naruto.service.impl;
 
+import com.db.crud_naruto.DTO.personagem.AprenderJutsuDto;
 import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
 import com.db.crud_naruto.exceptions.BadRequestException;
@@ -49,24 +50,22 @@ public class PersonagemServiceImpl implements PersonagemService {
 
     @Override
     public ResponsePersonagemDto createPersonagem(RequestPersonagemDto dto) {
-        log.info("Criando novo personagem: {}", dto.getNome());
-        Personagem novoPersonagem = switch(dto.getEspecialidade().toLowerCase()){
+        log.info("Criando novo personagem: {}", dto.nome());
+        Personagem novoPersonagem = switch(dto.especialidade().toLowerCase()){
             case "ninjutsu" -> new NinjaDeNinjutsu();
             case "taijutsu" -> new NinjaDeTaijutsu();
             case "genjutsu" -> new NinjaDeGenjutsu();
             default -> {
-                log.error("Especialidade inválida: {}", dto.getEspecialidade());
+                log.error("Especialidade inválida: {}", dto.especialidade());
                 throw new IllegalArgumentException("Especialidade inválida");
             }
 
         };
 
-        novoPersonagem.setNome(dto.getNome());
-        novoPersonagem.setIdade(dto.getIdade());
-        novoPersonagem.setAldeia(dto.getAldeia());
-        novoPersonagem.setVida(dto.getVida());
+        novoPersonagem.setNome(dto.nome());
+        novoPersonagem.setVida(dto.vida());
         novoPersonagem.setChakra(100);
-        Map<String,Integer> jutsus = dto.getJutsus();
+        Map<String,Integer> jutsus = dto.jutsus();
 
         if(jutsus.isEmpty()){
             log.error("Ninja não foi criado pois não possui jutsus");
@@ -91,24 +90,22 @@ public class PersonagemServiceImpl implements PersonagemService {
             throw new NotFoundException("Personagem não encontrado");
         }
 
-        Personagem novoPersonagem = switch(dto.getEspecialidade().toLowerCase()){
+        Personagem novoPersonagem = switch(dto.especialidade().toLowerCase()){
             case "ninjutsu" -> new NinjaDeNinjutsu();
             case "taijutsu" -> new NinjaDeTaijutsu();
             case "genjutsu" -> new NinjaDeGenjutsu();
             default -> {
-                log.error("Especialidade inválida: {}", dto.getEspecialidade());
+                log.error("Especialidade inválida: {}", dto.especialidade());
                 throw new IllegalArgumentException("Especialidade inválida");
             }
         };
 
         novoPersonagem.setId(charId);
-        novoPersonagem.setNome(dto.getNome());
-        novoPersonagem.setIdade(dto.getIdade());
-        novoPersonagem.setAldeia(dto.getAldeia());
-        novoPersonagem.setVida(dto.getVida());
+        novoPersonagem.setNome(dto.nome());
+        novoPersonagem.setVida(dto.vida());
         novoPersonagem.setChakra(100);
 
-        Map<String,Integer> jutsus = dto.getJutsus();
+        Map<String,Integer> jutsus = dto.jutsus();
 
         if(jutsus.isEmpty()){
             log.error("Ninja não foi atualizado pois não possui jutsus");
@@ -124,33 +121,34 @@ public class PersonagemServiceImpl implements PersonagemService {
     }
 
     @Override
-    public ResponsePersonagemDto aprenderJutsu(Long charId, String nomeJutsu, Integer dano) {
+    public ResponsePersonagemDto aprenderJutsu(Long charId, AprenderJutsuDto dto) {
         log.info("Checando se personagem com id {} existe", charId);
-        Optional<Personagem> personagemOptional = personagemRepository.findById(charId);
 
-        if(personagemOptional.isEmpty()){
-            log.error("Personagem com ID {} não encontrado", charId);
-            throw new NotFoundException("Personagem não encontrado");
+        Personagem personagem = personagemRepository.findById(charId)
+                .orElseThrow(() -> {
+                    log.warn("Personagem com ID {} não encontrado", charId);
+                    return new NotFoundException("Personagem não encontrado");
+                });
+
+        if (dto.nomeJutsu() == null || dto.dano() == null || dto.dano() <= 0) {
+            log.warn("Dados inválidos para aprendizado de jutsu: nome={}, dano={}", dto.nomeJutsu(), dto.dano());
+            throw new BadRequestException("Nome do jutsu ou dano inválido");
         }
 
-        log.info("Criando lista de jutsus do personagem");
-        Map<String, Integer> jutsus = personagemOptional.get().getJutsus();
+        Map<String, Integer> jutsus = personagem.getJutsus();
 
-        if (jutsus.containsKey(nomeJutsu)){
-            log.error("Personagem já sabe o jutsu");
+        if (jutsus.containsKey(dto.nomeJutsu())) {
+            log.info("Personagem já conhece o jutsu '{}'", dto.nomeJutsu());
             throw new BadRequestException("Personagem já sabe o jutsu");
         }
 
-        log.info("Adicionando jutsu ao personagem");
-        jutsus.put(nomeJutsu, dano);
+        jutsus.put(dto.nomeJutsu(), dto.dano());
+        personagem.setJutsus(jutsus);
 
-        log.info("Criando personagem atualizado com novo jutsu");
-        Personagem personagemAtualizado = personagemOptional.get();
-        personagemAtualizado.setJutsus(jutsus);
-
-        log.info("Retornando personagem atualizado");
-        return personagemRepository.save(personagemAtualizado).toDto();
+        log.info("Jutsu '{}' adicionado ao personagem com ID {}", dto.nomeJutsu(), charId);
+        return personagemRepository.save(personagem).toDto();
     }
+
 
     @Override
     public void deletePersonagem(Long charId) {

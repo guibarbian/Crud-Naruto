@@ -49,7 +49,7 @@ Esta API conta com um padrão de segurança baseado em JWT (JSON Web Token) para
 autorização. Para utilizar os seus Endpoints, você deve registrar um usuário e logar com as credenciais
 nescessarias(email e senha).
 
-Para criar um usuário, basta acessar o endpoint `/api/v1/auth/registration` com um JSON body contendo as
+Para criar um usuário, basta acessar o endpoint `/api/v2/auth/registration` com um JSON body contendo as
 seguintes informações:
 
 ```json
@@ -59,7 +59,7 @@ seguintes informações:
 }
 ```
 
-Ao criar o seu usuário(Endpoint retornou 201), você pode acessar o `/api/v1/auth/login` para se autenticar e utilizar os
+Ao criar o seu usuário(Endpoint retornou 201), você pode acessar o `/api/v2/auth/login` para se autenticar e utilizar os
 demais endpoints. A autenticação requer um JSON body com as seguintes informações:
 
 ```json
@@ -78,11 +78,11 @@ Esta API tem os seguintes Endpoints para organização de tarefas
 
 | Método | Endpoint                   | Descrição                                 |
 |--------|----------------------------|-------------------------------------------|
-| GET    | `/api/v1/personagens`      | Retorna todos os personagens por Paginção |
-| GET    | `/api/v1/personagens/{id}` | Retorna um personagem por ID              |
-| POST   | `/api/v1/personagens`      | Cria um personagem                        |
-| PUT    | `/api/v1/personagens/{id}` | Atualiza um personagem                    |
-| DELETE | `/api/v1/personagens/{id}` | Deleta um personagem                      |
+| GET    | `/api/v2/personagens`      | Retorna todos os personagens por Paginção |
+| GET    | `/api/v2/personagens/{id}` | Retorna um personagem por ID              |
+| POST   | `/api/v2/personagens`      | Cria um personagem                        |
+| PUT    | `/api/v2/personagens/{id}` | Atualiza um personagem                    |
+| DELETE | `/api/v2/personagens/{id}` | Deleta um personagem                      |
 
 ## 
 
@@ -90,12 +90,12 @@ Para criar ou atualizar uma tarefa, você deve enviar um corpo JSON com os segui
 ```json
 {
   "nome": "Sasuke Uchiha",
-  "idade": 16,
-  "aldeia": "Renegado",
+  "vida": 100,
   "chakra": 120,
-  "jutsus": [
-    "Sharingan", "Chidori", "Amaterasu", "Susanoo"
-  ],
+  "jutsus": {
+    "Sharingan":60,
+    "Chidori": 50
+  },
   "especialidade": "Ninjutsu"
 }
 ```
@@ -108,6 +108,19 @@ são permitidos os seguintes tipos:
 - Taijutsu
 
 A diferença entre eles é a mensagem ao utilizar os seus `jutsus`
+
+## Batalha ⚔
+
+Na versão 2 da API foi adicionada a função de simular uma batalha entre os ninjas, 
+para simular um confronto final entre dois personagens, basta saber o ID de cada um. Assim, acessando o 
+endpoint `api/v2/batalhas/{idDoPrimeiroPersonagem}/{idDoSegundoPersonagem}`, você poderá
+imaginar um confronto entre os dois!
+
+As batalhas são baseadas no uso de chakra e nas condições de vida dos ninjas, se utilizando de
+turnos para calcular a chance do ninja desviar ou não do ataque do outro, o resultado nem 
+sempre será o mesmo, mesmo com um ninja mais fraco, você ainda pode vencer!
+
+Para acompanhar mais de perto o embate, cheque os logs no terminal da aplicação!
 
 # Desenvolvido com ⚙
 

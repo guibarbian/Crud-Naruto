@@ -1,5 +1,6 @@
 package com.db.crud_naruto.controller.impl;
 
+import com.db.crud_naruto.DTO.personagem.AprenderJutsuDto;
 import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
 import com.db.crud_naruto.controller.PersonagemController;
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/personagens")
+@RequestMapping("/api/v2/personagens")
 @RequiredArgsConstructor
 public class PersonagemControllerImpl implements PersonagemController {
 
@@ -39,6 +40,12 @@ public class PersonagemControllerImpl implements PersonagemController {
     @PutMapping("/{charId}")
     public ResponseEntity<ResponsePersonagemDto> updatePersonagem(@PathVariable Long charId, @RequestBody RequestPersonagemDto dto) {
         return ResponseEntity.ok(personagemService.updatePersonagem(charId, dto));
+    }
+
+    @Override
+    @PutMapping("/{charId}/aprenderJutsu")
+    public ResponseEntity<ResponsePersonagemDto> aprenderJutsu(@PathVariable Long charId, @RequestBody AprenderJutsuDto dto) {
+        return ResponseEntity.ok(personagemService.aprenderJutsu(charId, dto));
     }
 
     @Override

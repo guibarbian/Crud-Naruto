@@ -27,12 +27,6 @@ public abstract class Personagem {
     @Column(name = "nome", nullable = false)
     private String nome;
 
-    @Column(name = "idade", nullable = false)
-    private Integer idade;
-
-    @Column(name = "aldeia", nullable = false)
-    private String aldeia;
-
     @Column(name = "vida", nullable = false)
     private Integer vida;
 
