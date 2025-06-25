@@ -12,6 +12,7 @@ Este é um CRUD simples de batalha Ninja
 - **PostgreSQL** - Banco de dados
 - **H2** - Banco de dados em memória para testes
 - **Spring Security** - Para autenticação e autorização
+- **Spring Validation** - Para validação de dados
 - **Swagger** - Para documentação da API
 - **Maven** - Gerenciador de dependências
 - **JUnit** - Para testes unitários
