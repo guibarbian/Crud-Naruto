@@ -15,12 +15,12 @@ public record RequestPersonagemDto(
         String nome,
 
         @NotNull(message = "Vida não pode ser nula")
-        @Min(value = 1, message = "Vida deve ser pelo menos 1")
+        @Min(value = 0, message = "Vida deve ser pelo menos 0")
         @Max(value = 500, message = "Vida deve ser no máximo 500")
         Integer vida,
 
         @NotNull(message = "Chakra não pode ser nula")
-        @Min(value = 1, message = "Chakra deve ser pelo menos 1")
+        @Min(value = 0, message = "Chakra deve ser pelo menos 0")
         @Max(value = 500, message = "Chakra deve ser no máximo 500")
         Integer chakra,
 

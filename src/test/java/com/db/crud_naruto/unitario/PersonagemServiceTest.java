@@ -81,7 +81,7 @@ public class PersonagemServiceTest {
 
         NinjaDeNinjutsu auxNinja = NinjaDeNinjutsu.builder()
                 .nome(dto.nome())
-                .vida(dto.vida()).chakra(100).jutsus(dto.jutsus()).build();
+                .vida(dto.vida()).chakra(dto.chakra()).jutsus(dto.jutsus()).build();
 
         when(personagemRepository.save(auxNinja)).thenReturn(ninjutsu);
 
@@ -102,7 +102,7 @@ public class PersonagemServiceTest {
 
         NinjaDeGenjutsu auxNinja = NinjaDeGenjutsu.builder()
                 .nome(dto.nome())
-                .vida(dto.vida()).chakra(100).jutsus(dto.jutsus()).build();
+                .vida(dto.vida()).chakra(dto.chakra()).jutsus(dto.jutsus()).build();
 
         when(personagemRepository.save(auxNinja)).thenReturn(genjutsu);
 
@@ -122,7 +122,7 @@ public class PersonagemServiceTest {
 
         NinjaDeTaijutsu auxNinja = NinjaDeTaijutsu.builder()
                 .nome(dto.nome())
-                .vida(dto.vida()).chakra(100).jutsus(dto.jutsus()).build();
+                .vida(dto.vida()).chakra(dto.chakra()).jutsus(dto.jutsus()).build();
 
         when(personagemRepository.save(auxNinja)).thenReturn(taijutsu);
 
@@ -198,7 +198,7 @@ public class PersonagemServiceTest {
 
         NinjaDeNinjutsu auxNinja = NinjaDeNinjutsu.builder()
                 .id(1L).nome(dto.nome())
-                .vida(dto.vida()).chakra(100).jutsus(dto.jutsus()).build();
+                .vida(dto.vida()).chakra(dto.chakra()).jutsus(dto.jutsus()).build();
 
         ninjutsu.setVida(dto.vida());
 

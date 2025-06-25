@@ -3,12 +3,10 @@ package com.db.crud_naruto.integracao;
 import com.db.crud_naruto.DTO.auth.AuthenticationDTO;
 import com.db.crud_naruto.DTO.auth.RegisterDTO;
 import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
-import com.db.crud_naruto.model.NinjaDeGenjutsu;
 import com.db.crud_naruto.model.NinjaDeNinjutsu;
 import com.db.crud_naruto.repository.PersonagemRepository;
 import com.db.crud_naruto.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hibernate.tuple.PropertyFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -151,6 +150,7 @@ public class PersonagemControllerTest {
         RequestPersonagemDto personagem = RequestPersonagemDto.builder()
                 .nome("Naruto Uzumaki")
                 .vida(100)
+                .chakra(100)
                 .especialidade("Ninjutsu")
                 .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
@@ -237,5 +237,47 @@ public class PersonagemControllerTest {
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testCreatePersonagemNomeNull() throws Exception{
+        RequestPersonagemDto personagemDto = RequestPersonagemDto.builder()
+                .nome(null).vida(100).chakra(100)
+                .jutsus(Map.of("Chidori", 20)).especialidade("Ninjutsu").build();
+
+        mockMvc.perform(post(baseUrl)
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(personagemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.requestPersonagemDto").value("Nome é obrigatório"));
+    }
+
+    @Test
+    void testCreatePersonagemNomeMuitoCurto() throws Exception{
+        RequestPersonagemDto personagemDto = RequestPersonagemDto.builder()
+                .nome("Ju").vida(100).chakra(100)
+                .jutsus(Map.of("Chidori", 20)).especialidade("Ninjutsu").build();
+
+        mockMvc.perform(post(baseUrl)
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(personagemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.requestPersonagemDto").value("Nome deve ter entre 3 e 50 caracteres"));
+    }
+
+    @Test
+    void testCreatePersonagemNomeMuitoLongo() throws Exception{
+        RequestPersonagemDto personagemDto = RequestPersonagemDto.builder()
+                .nome("José Wellington Francisco de Assis Bezerra da Cunha Filho").vida(100).chakra(100)
+                .jutsus(Map.of("Chidori", 20)).especialidade("Ninjutsu").build();
+
+        mockMvc.perform(post(baseUrl)
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(personagemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.requestPersonagemDto").value("Nome deve ter entre 3 e 50 caracteres"));
     }
 }
