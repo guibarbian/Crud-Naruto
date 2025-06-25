@@ -7,10 +7,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Personagem", description = "Endpoints para manejo de personagens")
 public interface PersonagemController {
@@ -27,6 +29,7 @@ public interface PersonagemController {
                     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
             }
     )
+    @GetMapping
     Page<ResponsePersonagemDto> findAll(Pageable pageable);
 
     @Operation(summary = "Listar personagem por ID",
@@ -40,7 +43,8 @@ public interface PersonagemController {
                     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
             }
     )
-    ResponseEntity<ResponsePersonagemDto> findPersonagemById(Long charId);
+    @GetMapping("/{charId}")
+    ResponseEntity<ResponsePersonagemDto> findPersonagemById(@PathVariable Long charId);
 
     @Operation(summary = "Criar personagem",
             description = "Cria um personagem pelo corpo JSON",
@@ -53,7 +57,8 @@ public interface PersonagemController {
                     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
             }
     )
-    ResponseEntity<ResponsePersonagemDto> createPersonagem(RequestPersonagemDto dto);
+    @PostMapping
+    ResponseEntity<ResponsePersonagemDto> createPersonagem(@RequestBody @Valid RequestPersonagemDto dto);
 
     @Operation(summary = "Atualizar personagem por ID",
             description = "Atualiza um personagem pelo ID",
@@ -68,7 +73,8 @@ public interface PersonagemController {
                     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
             }
     )
-    ResponseEntity<ResponsePersonagemDto> updatePersonagem(Long charId, RequestPersonagemDto dto);
+    @PutMapping("/{charId}")
+    ResponseEntity<ResponsePersonagemDto> updatePersonagem(@PathVariable Long charId, @RequestBody @Valid RequestPersonagemDto dto);
 
     @Operation(summary = "Aprender jutsu",
             description = "Adiciona um jutsu à lista do personagem",
@@ -83,7 +89,8 @@ public interface PersonagemController {
                     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
             }
     )
-    ResponseEntity<ResponsePersonagemDto> aprenderJutsu(Long charId, AprenderJutsuDto dto);
+    @PutMapping("{charId}/aprenderJutsu")
+    ResponseEntity<ResponsePersonagemDto> aprenderJutsu(@PathVariable Long charId, @RequestBody @Valid AprenderJutsuDto dto);
 
     @Operation(summary = "Deletar personagem por ID",
             description = "Deleta um personagem pelo ID",
@@ -96,5 +103,6 @@ public interface PersonagemController {
                     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
             }
     )
-    ResponseEntity<String> deletePersonagem(Long charId);
+    @DeleteMapping("/{charId}")
+    ResponseEntity<String> deletePersonagem(@PathVariable Long charId);
 }

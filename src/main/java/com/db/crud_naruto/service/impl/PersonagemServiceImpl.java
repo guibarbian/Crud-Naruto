@@ -11,15 +11,18 @@ import com.db.crud_naruto.model.NinjaDeTaijutsu;
 import com.db.crud_naruto.model.Personagem;
 import com.db.crud_naruto.repository.PersonagemRepository;
 import com.db.crud_naruto.service.PersonagemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Map;
 import java.util.Optional;
 
+@Validated
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -49,7 +52,7 @@ public class PersonagemServiceImpl implements PersonagemService {
     }
 
     @Override
-    public ResponsePersonagemDto createPersonagem(RequestPersonagemDto dto) {
+    public ResponsePersonagemDto createPersonagem(@Valid RequestPersonagemDto dto) {
         log.info("Criando novo personagem: {}", dto.nome());
         Personagem novoPersonagem = switch(dto.especialidade().toLowerCase()){
             case "ninjutsu" -> new NinjaDeNinjutsu();
@@ -81,7 +84,7 @@ public class PersonagemServiceImpl implements PersonagemService {
     }
 
     @Override
-    public ResponsePersonagemDto updatePersonagem(Long charId, RequestPersonagemDto dto) {
+    public ResponsePersonagemDto updatePersonagem(Long charId, @Valid RequestPersonagemDto dto) {
         log.info("Atualizando personagem com ID: {}", charId);
         Optional<Personagem> personagemExistente = personagemRepository.findById(charId);
 
@@ -121,7 +124,7 @@ public class PersonagemServiceImpl implements PersonagemService {
     }
 
     @Override
-    public ResponsePersonagemDto aprenderJutsu(Long charId, AprenderJutsuDto dto) {
+    public ResponsePersonagemDto aprenderJutsu(Long charId, @Valid AprenderJutsuDto dto) {
         log.info("Checando se personagem com id {} existe", charId);
 
         Personagem personagem = personagemRepository.findById(charId)
