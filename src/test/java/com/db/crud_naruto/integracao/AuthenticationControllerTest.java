@@ -53,8 +53,8 @@ class AuthenticationControllerIntegrationTest {
     @Test
     void deveAutenticarUsuarioComSucesso() throws Exception {
         RegisterDTO registerDTO = RegisterDTO.builder()
-                .nome("sasuke")
-                .senha("sharingan")
+                .nome("Naruto")
+                .senha("Ramen123")
                 .build();
 
         mockMvc.perform(post("/api/v1/auth/register")
@@ -63,8 +63,8 @@ class AuthenticationControllerIntegrationTest {
                 .andExpect(status().isCreated());
 
         AuthenticationDTO authDTO = AuthenticationDTO.builder()
-                .nome("sasuke")
-                .senha("sharingan")
+                .nome("Naruto")
+                .senha("Ramen123")
                 .build();
 
         mockMvc.perform(post("/api/v1/auth/login")
@@ -104,4 +104,6 @@ class AuthenticationControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(authDTO)))
                 .andExpect(status().isForbidden());
     }
+
+
 }

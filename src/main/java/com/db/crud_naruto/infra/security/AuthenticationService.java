@@ -23,13 +23,13 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterDTO dto) {
-        if(usuarioRepository.findByNome(dto.getNome()).isPresent()){
+        if(usuarioRepository.findByNome(dto.nome()).isPresent()){
             throw new BadRequestException("Nome de usuário já está em uso");
         }
 
         var usuario = Usuario.builder()
-                .nome(dto.getNome())
-                .senha(passwordEncoder.encode(dto.getSenha()))
+                .nome(dto.nome())
+                .senha(passwordEncoder.encode(dto.senha()))
                 .role(Role.USER).build();
 
         usuarioRepository.save(usuario);
@@ -42,12 +42,12 @@ public class AuthenticationService {
     public AuthenticationResponse login(AuthenticationDTO dto) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        dto.getNome(),
-                        dto.getSenha()
+                        dto.nome(),
+                        dto.senha()
                 )
         );
 
-        var person = usuarioRepository.findByNome(dto.getNome())
+        var person = usuarioRepository.findByNome(dto.nome())
                 .orElseThrow();
         var jwtToken = tokenService.generateToken(person);
         return AuthenticationResponse.builder()

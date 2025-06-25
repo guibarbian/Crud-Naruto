@@ -1,14 +1,11 @@
 package com.db.crud_naruto.DTO.auth;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class AuthenticationResponse {
-    String token;
+public record AuthenticationResponse(
+        @NotNull
+        String token
+) {
 }
