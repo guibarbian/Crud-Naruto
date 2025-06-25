@@ -42,10 +42,19 @@ public class BatalhaControllerTest {
     private PersonagemRepository personagemRepository;
 
     @BeforeEach
-    void setUp() throws Exception{
+    void setUp() throws Exception {
+        RegisterDTO registerDTO = RegisterDTO.builder()
+                .nome("Naruto")
+                .senha("Ramen123")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerDTO)));
+
         AuthenticationDTO loginDTO = AuthenticationDTO.builder()
-                .nome("Paul")
-                .senha("123456")
+                .nome("Naruto")
+                .senha("Ramen123")
                 .build();
 
         String response = mockMvc.perform(post("/api/v1/auth/login")
@@ -55,6 +64,34 @@ public class BatalhaControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         token = "Bearer " + objectMapper.readTree(response).get("token").asText();
+
+        RequestPersonagemDto personagem1 = RequestPersonagemDto.builder()
+                .nome("Naruto Uzumaki")
+                .vida(100)
+                .chakra(100)
+                .especialidade("Ninjutsu")
+                .jutsus(Map.of("Rasengan", 20, "Kage Bushin no Jutsu", 20))
+                .build();
+
+        mockMvc.perform(post("/api/v2/personagens")
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(personagem1)))
+                .andExpect(status().isCreated());
+
+        RequestPersonagemDto personagem2 = RequestPersonagemDto.builder()
+                .nome("Sasuke Uchiha")
+                .vida(100)
+                .chakra(100)
+                .especialidade("Ninjutsu")
+                .jutsus(Map.of("Chidori", 20, "Jutsu Bola de Fogo", 20))
+                .build();
+
+        mockMvc.perform(post("/api/v2/personagens")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(personagem2)))
+                .andExpect(status().isCreated());
     }
 
     @Test

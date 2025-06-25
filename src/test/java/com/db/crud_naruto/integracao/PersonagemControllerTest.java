@@ -8,6 +8,7 @@ import com.db.crud_naruto.model.NinjaDeNinjutsu;
 import com.db.crud_naruto.repository.PersonagemRepository;
 import com.db.crud_naruto.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.tuple.PropertyFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,8 @@ public class PersonagemControllerTest {
     void setUp() throws Exception {
 
         RegisterDTO registerDTO = RegisterDTO.builder()
-                .nome("Paul")
-                .senha("123456")
+                .nome("Naruto")
+                .senha("Ramen123")
                 .build();
 
         mockMvc.perform(post("/api/v1/auth/register")
@@ -55,8 +56,8 @@ public class PersonagemControllerTest {
                 .content(objectMapper.writeValueAsString(registerDTO)));
 
         AuthenticationDTO loginDTO = AuthenticationDTO.builder()
-                .nome("Paul")
-                .senha("123456")
+                .nome("Naruto")
+                .senha("Ramen123")
                 .build();
 
         String response = mockMvc.perform(post("/api/v1/auth/login")
@@ -70,8 +71,16 @@ public class PersonagemControllerTest {
 
     @Test
     void testFindPersonagemById() throws Exception{
+        NinjaDeNinjutsu naruto = NinjaDeNinjutsu.builder()
+                .nome("Naruto Uzumaki")
+                .chakra(100)
+                .vida(100)
+                .jutsus(Map.of("Rasengan", 20, "Kage Bushin no Jutsu", 20))
+                .build();
 
-        mockMvc.perform(get(baseUrl + "/1")
+        NinjaDeNinjutsu savedNinja = personagemRepository.save(naruto);
+
+        mockMvc.perform(get(baseUrl + "/" + savedNinja.getId())
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -82,14 +91,23 @@ public class PersonagemControllerTest {
 
     @Test
     void testFindAllPersonagens() throws Exception {
+        NinjaDeNinjutsu sasuke = NinjaDeNinjutsu.builder()
+                .nome("Sasuke Uchiha")
+                .chakra(100)
+                .vida(100)
+                .jutsus(Map.of("Chidori", 20, "Kirin", 20))
+                .build();
+
+        personagemRepository.save(sasuke);
+
         mockMvc.perform(get(baseUrl)
                         .header("Authorization", token)
                         .param("page", "0")
                         .param("size", "10")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].nome").value("Sasuke Uchiha"))
-                .andExpect(jsonPath(("$.content[1].nome")).value("Rock Lee"));
+                .andExpect(jsonPath("$.content[0].nome").value("Naruto Uzumaki"))
+                .andExpect(jsonPath(("$.content[1].nome")).value("Sasuke Uchiha"));
     }
 
 
@@ -146,6 +164,15 @@ public class PersonagemControllerTest {
 
     @Test
     void testEspecialidadeInvalidaUpdate() throws Exception{
+        NinjaDeNinjutsu ninja = NinjaDeNinjutsu.builder()
+                .nome("Naruto Uzumaki")
+                .vida(100)
+                .chakra(100)
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
+                .build();
+
+        NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
+
         RequestPersonagemDto updateNinja = RequestPersonagemDto.builder()
                         .nome("Naruto Uzumaki")
                         .vida(120)
@@ -153,7 +180,7 @@ public class PersonagemControllerTest {
                         .especialidade("NoJutsu")
                         .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20)).build();
 
-        mockMvc.perform(put(baseUrl + "/10")
+        mockMvc.perform(put(baseUrl + "/" + savedNinja.getId())
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateNinja)))
@@ -166,6 +193,7 @@ public class PersonagemControllerTest {
                 .nome("Tobirama Senju")
                 .chakra(100)
                 .vida(100)
+                .chakra(100)
                 .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();
 
@@ -174,6 +202,7 @@ public class PersonagemControllerTest {
         RequestPersonagemDto updatedPersonagem = RequestPersonagemDto.builder()
                 .nome("Naruto Uzumaki")
                 .vida(100)
+                .chakra(100)
                 .especialidade("Ninjutsu")
                 .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
                 .build();

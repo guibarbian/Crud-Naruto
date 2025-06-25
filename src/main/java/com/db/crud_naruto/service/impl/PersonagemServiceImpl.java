@@ -64,7 +64,7 @@ public class PersonagemServiceImpl implements PersonagemService {
 
         novoPersonagem.setNome(dto.nome());
         novoPersonagem.setVida(dto.vida());
-        novoPersonagem.setChakra(100);
+        novoPersonagem.setChakra(dto.chakra());
         Map<String,Integer> jutsus = dto.jutsus();
 
         if(jutsus.isEmpty()){
@@ -103,7 +103,7 @@ public class PersonagemServiceImpl implements PersonagemService {
         novoPersonagem.setId(charId);
         novoPersonagem.setNome(dto.nome());
         novoPersonagem.setVida(dto.vida());
-        novoPersonagem.setChakra(100);
+        novoPersonagem.setChakra(dto.chakra());
 
         Map<String,Integer> jutsus = dto.jutsus();
 
