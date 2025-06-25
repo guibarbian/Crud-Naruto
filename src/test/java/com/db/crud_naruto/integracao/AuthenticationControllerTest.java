@@ -105,5 +105,29 @@ class AuthenticationControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void deveRetornarErroAoRegistrarUsuarioComNomeNulo() throws Exception{
+        RegisterDTO registerDTO = RegisterDTO.builder()
+                .nome(null)
+                .senha("Ramen123").build();
 
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.registerDTO").value("O nome é obrigatório"));
+    }
+
+    @Test
+    void deveRetornarErroAoRegistrarUsuarioComSenhaCurta() throws Exception{
+        RegisterDTO registerDTO = RegisterDTO.builder()
+                .nome("naruto")
+                .senha("123").build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.registerDTO").value("A senha deve ter entre 6 e 20 caracteres"));
+    }
 }
