@@ -10,6 +10,7 @@ Este é um CRUD simples de batalha Ninja
 - **SpringBoot** - Framework principal
 - **Spring Data JPA** - Para interações com o banco de dados
 - **PostgreSQL** - Banco de dados
+- **H2** - Banco de dados em memória para testes
 - **Spring Security** - Para autenticação e autorização
 - **Swagger** - Para documentação da API
 - **Maven** - Gerenciador de dependências
@@ -23,24 +24,38 @@ Este é um CRUD simples de batalha Ninja
 - Maven
 - IDE(recomendado IntelliJ ou VSCode)
 
-## Como rodar o projeto
+## Como rodar o projeto 💿
 
-1. Copie o repositório
+Este projeto tem porte para Docker e Swagger, então você pode tanto cirar uma imagem para 
+rodar o projeto via Docker, quanto checar a documentação em Swagger, quanto rodá-lo
+localmente, para qualquer um destes, basta seguir as instruções:
+
+### 1. Copie o repositório 
 ```bash
 git clone https://github.com/guibarbian/Crud-Naruto
 cd Crud-Naruto
 ```
-2. Instale as dependências
+### 2. Instale as dependências
 ```bash
 mvn install
 ```
-3. Rode a aplicação
+### 3. Rode a aplicação
+
+#### Com Docker
+```bash
+docker-compose up
+```
+
+#### Com Swagger/ Localmente
+
 ```bash
 mvn spring-boot:run
 ```
 A aplicação vai ser executada em http://localhost:8080
 
-Você pode usar algum cliente de API como Postman ou Insomnia para testar os endpoints manualmente
+Você pode usar algum cliente de API como Postman ou Insomnia para testar os endpoints 
+manualmente ou acessar http://localhost:8080/swagger-ui/index.html para visualizar a 
+documentação destes.
 
 # Endpoints
 ## Segurança
