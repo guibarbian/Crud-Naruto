@@ -68,7 +68,6 @@ public class BatalhaServiceImpl implements BatalhaService {
                 double chanceDeDesvio = ((double)ninja2.getChakra() / (double)ninja1.getVida()) * 60;
                 double chanceDeAtaque = (Math.random() * 100);
 
-
                 log.info("Chance de desvio: {}%, Chance de ataque: {}%", chanceDeDesvio, chanceDeAtaque);
                 if(chanceDeAtaque > chanceDeDesvio){
                     log.info("{} acerta o ataque!", ninja2.getNome());
