@@ -1,7 +1,8 @@
 package com.db.crud_naruto.unitario;
 
-import com.db.crud_naruto.exceptions.NotFoundException;
-import com.db.crud_naruto.model.*;
+import com.db.crud_naruto.model.NinjaDeGenjutsu;
+import com.db.crud_naruto.model.NinjaDeNinjutsu;
+import com.db.crud_naruto.model.NinjaDeTaijutsu;
 import com.db.crud_naruto.repository.PersonagemRepository;
 import com.db.crud_naruto.service.impl.BatalhaServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,38 +34,27 @@ public class BatalhaServiceTest {
             .chakra(100).vida(100).jutsus(Map.of("Lotus", 60)).build();
 
     @Test
-    public void testGetPersonagem(){
-        when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninjutsu));
-
-        Personagem personagem = batalhaService.findPersonagem(1L);
-
-        assertEquals("Sasuke Uchiha", personagem.getNome());
-        assertEquals(NinjaDeNinjutsu.class, personagem.getClass());
-    }
-
-    @Test
-    public void testGetPersonagemNegativo(){
-        when(personagemRepository.findById(4L)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> batalhaService.findPersonagem(4L));
-    }
-
-    @Test
     public void testBatalhaPorVida(){
+        when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninjutsu));
+        when(personagemRepository.findById(2L)).thenReturn(Optional.of(genjutsu));
+
         ninjutsu.setVida(0);
 
-        Personagem vencedor = batalhaService.batalha(ninjutsu, taijutsu);
+        String result = batalhaService.iniciarBatalha(1L, 2L);
 
-        assertEquals("Rock Lee", vencedor.getNome());
+        assertEquals("Fim da batalha! Itachi Uchiha venceu!", result);
     }
 
     @Test
     public void testBatalhaPorChakra(){
-        taijutsu.setChakra(0);
+        when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninjutsu));
+        when(personagemRepository.findById(2L)).thenReturn(Optional.of(genjutsu));
 
-        Personagem vencedor = batalhaService.batalha(ninjutsu, taijutsu);
+        genjutsu.setChakra(0);
 
-        assertEquals("Sasuke Uchiha", vencedor.getNome());
+        String result = batalhaService.iniciarBatalha(1L, 2L);
+
+        assertEquals("Fim da batalha! Sasuke Uchiha venceu!", result);
     }
 
     @Test

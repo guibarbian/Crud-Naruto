@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,8 +19,8 @@ public class BatalhaServiceImpl implements BatalhaService {
     public String iniciarBatalha(Long idDesafiante, Long idDesafiado) {
         log.info("Iniciando batalha entre personagens com ids {} e {}", idDesafiante, idDesafiado);
 
-        Personagem ninja1 = findPersonagem(idDesafiante);
-        Personagem ninja2 = findPersonagem(idDesafiado);
+        Personagem ninja1 = buscarPersonagem(idDesafiante);
+        Personagem ninja2 = buscarPersonagem(idDesafiado);
 
         log.info("Começa a batalha");
         Personagem vencedor = batalha(ninja1, ninja2);
@@ -30,63 +28,71 @@ public class BatalhaServiceImpl implements BatalhaService {
         return "Fim da batalha! " + vencedor.getNome() + " venceu!";
     }
 
-    public Personagem findPersonagem(Long id){
-        log.info("Buscando personagem com id {}", id);
-        Optional<Personagem> personagem = personagemRepository.findById(id);
-
-        if(personagem.isEmpty()){
-            log.error("Personagem com id {} não encontrado", id);
-            throw new NotFoundException("Personagem não encontrado");
-        }
-
-        return personagem.get();
-    }
-
-    public Personagem batalha(Personagem ninja1, Personagem ninja2){
+    private Personagem batalha(Personagem ninja1, Personagem ninja2){
+        log.info("{} vs {}, comecem a batalha!", ninja1.getNome(), ninja2.getNome());
         int turno = 1;
 
-        while (ninja1.getVida() > 0 && ninja2.getVida() > 0 && ninja1.getChakra() > 0 && ninja2.getChakra() > 0){
+        while(ambosPodemLutar(ninja1, ninja2)){
             if(turno % 2 == 0){
-                log.info("Turno {}: {} ataca {}", turno, ninja1.getNome(), ninja2.getNome());
-
-                double chanceDeDesvio = ((double)ninja1.getChakra() / (double)ninja2.getVida()) * 60;
-                double chanceDeAtaque = (Math.random() * 100);
-
-                log.info("Chance de ataque: {}%, Chance de desvio: {}%", chanceDeAtaque, chanceDeDesvio);
-
-                if(chanceDeAtaque > chanceDeDesvio){
-                    log.info("{} acerta o ataque!", ninja1.getNome());
-                    ninja2.setVida(ninja2.getVida() - 20);
-                    ninja1.setChakra(ninja1.getChakra() - 10);
-                } else{
-                    log.info("{} desvia do ataque!", ninja2.getNome());
-                    ninja1.setChakra(ninja1.getChakra() - 10);
-                }
-            } else {
-                log.info("Turno {}: {} ataca {}", turno, ninja2.getNome(), ninja1.getNome());
-
-                double chanceDeDesvio = ((double)ninja2.getChakra() / (double)ninja1.getVida()) * 60;
-                double chanceDeAtaque = (Math.random() * 100);
-
-                log.info("Chance de desvio: {}%, Chance de ataque: {}%", chanceDeDesvio, chanceDeAtaque);
-                if(chanceDeAtaque > chanceDeDesvio){
-                    log.info("{} acerta o ataque!", ninja2.getNome());
-                    ninja1.setVida(ninja1.getVida() - 20);
-                    ninja2.setChakra(ninja2.getChakra() - 10);
-                } else{
-                    log.info("{} desvia do ataque!", ninja1.getNome());
-                    ninja2.setChakra(ninja2.getChakra() - 10);
-                }
+                rodarTurno(ninja1, ninja2, turno);
+            } else{
+                rodarTurno(ninja2, ninja1, turno);
             }
             turno++;
         }
+        Personagem vencedor = determinaVencedor(ninja1, ninja2);
+        log.info("{} venceu a batalha!", vencedor.getNome());
+        return vencedor;
+    }
 
-        if(ninja1.getVida() <= 0 || ninja1.getChakra() <= 0){
-            log.info("{} venceu a batalha!", ninja2.getNome());
-            return ninja2;
-        } else {
-            log.info("{} venceu a batalha!", ninja1.getNome());
-            return ninja1;
+    private Personagem buscarPersonagem(Long charId){
+        log.info("Buscando personagem com id {}", charId);
+        return personagemRepository.findById(charId)
+                .orElseThrow(() -> {
+                    log.error("Personagem com ID: {} não encontrado", charId);
+                    return new NotFoundException("Personagem não encontrado");
+                });
+    }
+
+    private boolean ambosPodemLutar(Personagem ninja1, Personagem ninja2){
+        return ninja1.getVida() > 0 && ninja1.getChakra() > 0 &&
+                ninja2.getVida() > 0 && ninja2.getChakra() > 0;
+    }
+
+    private double calculaChanceDeDesvio(int vidaDefensor, int chakraAtacante){
+        return((double) chakraAtacante / vidaDefensor) * 60;
+    }
+
+    private void rodarTurno(Personagem atacante, Personagem defensor, int turno){
+        log.info("Turno {}: {} ataca {}", turno, atacante.getNome(), defensor.getNome());
+
+        double chanceDeDesvio = calculaChanceDeDesvio(defensor.getVida(), atacante.getChakra());
+        double chanceDeAtaque = (Math.random() * 100);
+
+        log.info("Chance de ataque: {}%, Chance de desvio: {}%", chanceDeAtaque, chanceDeDesvio);
+        if(chanceDeAtaque > chanceDeDesvio){
+            realizaAtaque(atacante, defensor);
+        } else{
+            realizaDesviar(atacante, defensor);
         }
+    }
+
+    private void realizaAtaque(Personagem atacante, Personagem defensor){
+        log.info("{} acerta o ataque!", atacante.getNome());
+        defensor.setVida(defensor.getVida() - 20);
+        atacante.setChakra(atacante.getChakra() - 10);
+    }
+
+    private void realizaDesviar(Personagem atacante, Personagem defensor){
+        log.info("{} desvia do ataque!", defensor.getNome());
+        atacante.setChakra(atacante.getChakra() - 10);
+    }
+
+    private Personagem determinaVencedor(Personagem ninja1, Personagem ninja2){
+        if(ninja1.getVida() <= 0 || ninja1.getChakra() <= 0){
+            return ninja2;
+        }
+
+        return ninja1;
     }
 }
