@@ -2,6 +2,7 @@ package com.db.crud_naruto.integracao;
 
 import com.db.crud_naruto.DTO.auth.AuthenticationDTO;
 import com.db.crud_naruto.DTO.auth.RegisterDTO;
+import com.db.crud_naruto.DTO.personagem.AprenderJutsuDto;
 import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
 import com.db.crud_naruto.model.NinjaDeNinjutsu;
 import com.db.crud_naruto.repository.PersonagemRepository;
@@ -279,5 +280,111 @@ public class PersonagemControllerTest {
                         .content(objectMapper.writeValueAsString(personagemDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.requestPersonagemDto").value("Nome deve ter entre 3 e 50 caracteres"));
+    }
+
+    @Test
+    void testAprenderJutsuValido() throws Exception{
+        NinjaDeNinjutsu ninja = NinjaDeNinjutsu.builder()
+                .nome("Naruto Uzumaki")
+                .vida(100)
+                .chakra(100)
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
+                .build();
+
+        NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
+
+        AprenderJutsuDto dto = new AprenderJutsuDto("Rasen Churiken", 100);
+
+        mockMvc.perform(put(baseUrl + "/" + savedNinja.getId() + "/aprenderJutsu")
+                    .header("Authorization", token)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jutsus['Rasen Churiken']").value(100));
+
+    }
+
+    @Test
+    void testAprenderJutsuNomeNull() throws Exception{
+        NinjaDeNinjutsu ninja = NinjaDeNinjutsu.builder()
+                .nome("Naruto Uzumaki")
+                .vida(100)
+                .chakra(100)
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
+                .build();
+
+        NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
+
+        AprenderJutsuDto dto = new AprenderJutsuDto(null, 100);
+
+        mockMvc.perform(put(baseUrl + "/" + savedNinja.getId() + "/aprenderJutsu")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.aprenderJutsuDto").value("Nome do jutsu é obrigatório"));
+    }
+
+    @Test
+    void testAprenderJutsuNomeMuitoCurto() throws Exception{
+        NinjaDeNinjutsu ninja = NinjaDeNinjutsu.builder()
+                .nome("Naruto Uzumaki")
+                .vida(100)
+                .chakra(100)
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
+                .build();
+
+        NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
+
+        AprenderJutsuDto dto = new AprenderJutsuDto("asdc", 100);
+
+        mockMvc.perform(put(baseUrl + "/" + savedNinja.getId() + "/aprenderJutsu")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.aprenderJutsuDto").value("O nome do Jutsu deve ter entre 5 e 50 caracteres"));
+    }
+
+    @Test
+    void testAprenderJutsuDanoNull() throws Exception{
+        NinjaDeNinjutsu ninja = NinjaDeNinjutsu.builder()
+                .nome("Naruto Uzumaki")
+                .vida(100)
+                .chakra(100)
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
+                .build();
+
+        NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
+
+        AprenderJutsuDto dto = new AprenderJutsuDto("Rasen Churiken", null);
+
+        mockMvc.perform(put(baseUrl + "/" + savedNinja.getId() + "/aprenderJutsu")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.aprenderJutsuDto").value("Dano do Jutsu não pode ser nulo"));
+    }
+
+    @Test
+    void testAprenderJutsuDanoMuitoAlto() throws Exception{
+        NinjaDeNinjutsu ninja = NinjaDeNinjutsu.builder()
+                .nome("Naruto Uzumaki")
+                .vida(100)
+                .chakra(100)
+                .jutsus(Map.of("Rasengan", 40, "Kage Bushin no Jutsu", 20))
+                .build();
+
+        NinjaDeNinjutsu savedNinja = personagemRepository.save(ninja);
+
+        AprenderJutsuDto dto = new AprenderJutsuDto("Rasen Churiken", 150);
+
+        mockMvc.perform(put(baseUrl + "/" + savedNinja.getId() + "/aprenderJutsu")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.aprenderJutsuDto").value("O dano do jutsu deve ser entre 1 e 120"));
     }
 }
