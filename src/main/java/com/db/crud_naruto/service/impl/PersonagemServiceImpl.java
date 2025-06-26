@@ -76,10 +76,7 @@ public class PersonagemServiceImpl implements PersonagemService {
 
         validaJutsu(dto, personagem);
 
-        Map<String, Integer> jutsus = personagem.getJutsus();
-
-        jutsus.put(dto.nomeJutsu(), dto.dano());
-        personagem.setJutsus(jutsus);
+        personagem.getJutsus().put(dto.nomeJutsu(), dto.dano());
 
         log.info("Jutsu '{}' adicionado ao personagem com ID {}", dto.nomeJutsu(), charId);
         return personagemMapper.map(personagemRepository.save(personagem));
