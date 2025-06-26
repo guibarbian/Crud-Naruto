@@ -34,9 +34,6 @@ public class PersonagemControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
     private String token;
     private String baseUrl = "/api/v2/personagens";
 

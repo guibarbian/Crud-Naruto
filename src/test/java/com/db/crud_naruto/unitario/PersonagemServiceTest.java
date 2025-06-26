@@ -199,16 +199,9 @@ public class PersonagemServiceTest {
     @Test
     void testAprendeJutsu_BadRequest(){
         AprenderJutsuDto dto = AprenderJutsuDto.builder()
-                .nomeJutsu("Oodama Rasengan").build();
+                .nomeJutsu("Chidori").dano(20).build();
 
-        Map<String, Integer> jutsus = new HashMap<>();
-
-        NinjaDeNinjutsu ninja = NinjaDeNinjutsu.builder()
-                .id(1L).nome("Naruto Uzumaki")
-                .vida(100).chakra(100)
-                .jutsus(jutsus).build();
-
-        when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninja));
+        when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninjutsu));
 
         assertThrows(BadRequestException.class, () -> personagemService.aprenderJutsu(1L, dto));
     }
