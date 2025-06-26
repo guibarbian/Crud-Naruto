@@ -23,6 +23,7 @@ public record RequestPersonagemDto(
         Integer chakra,
 
         @NotNull(message = "A lista de jutsus não pode ser nula")
+        @NotEmpty(message = "A lista de jutsus não pode estar vazia")
         Map<String, Integer> jutsus,
 
         @NotNull(message = "Especialidade é obrigatória")

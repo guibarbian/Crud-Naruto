@@ -5,7 +5,11 @@ import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
 import com.db.crud_naruto.exceptions.BadRequestException;
 import com.db.crud_naruto.exceptions.NotFoundException;
-import com.db.crud_naruto.model.*;
+import com.db.crud_naruto.mapper.PersonagemMapper;
+import com.db.crud_naruto.model.NinjaDeGenjutsu;
+import com.db.crud_naruto.model.NinjaDeNinjutsu;
+import com.db.crud_naruto.model.NinjaDeTaijutsu;
+import com.db.crud_naruto.model.Personagem;
 import com.db.crud_naruto.repository.PersonagemRepository;
 import com.db.crud_naruto.service.impl.PersonagemServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -32,6 +36,9 @@ public class PersonagemServiceTest {
     @Mock
     private PersonagemRepository personagemRepository;
 
+    @Mock
+    private PersonagemMapper personagemMapper;
+
     @InjectMocks
     private PersonagemServiceImpl personagemService;
 
@@ -42,6 +49,13 @@ public class PersonagemServiceTest {
     NinjaDeTaijutsu taijutsu = NinjaDeTaijutsu.builder().id(3L).nome("Rock Lee")
             .chakra(100).vida(100).jutsus(Map.of("Lotus", 60)).build();
 
+    ResponsePersonagemDto ninjutsuDto = ResponsePersonagemDto.builder().id(ninjutsu.getId()).nome(ninjutsu.getNome())
+            .chakra(ninjutsu.getChakra()).vida(ninjutsu.getVida()).jutsus(ninjutsu.getJutsus()).build();
+    ResponsePersonagemDto genjutsuDto = ResponsePersonagemDto.builder().id(genjutsu.getId()).nome(genjutsu.getNome())
+            .chakra(genjutsu.getChakra()).vida(genjutsu.getVida()).jutsus(genjutsu.getJutsus()).build();
+    ResponsePersonagemDto taijutsuDto = ResponsePersonagemDto.builder().id(taijutsu.getId()).nome(taijutsu.getNome())
+            .chakra(taijutsu.getChakra()).vida(taijutsu.getVida()).jutsus(taijutsu.getJutsus()).build();
+
     @Test
     void testFindAll() {
         Pageable pageable = PageRequest.of(0, 10);
@@ -49,6 +63,9 @@ public class PersonagemServiceTest {
         Page<Personagem> page = new PageImpl<>(personagens);
 
         when(personagemRepository.findAll(pageable)).thenReturn(page);
+        when(personagemMapper.map(ninjutsu)).thenReturn(ninjutsuDto);
+        when(personagemMapper.map(genjutsu)).thenReturn(genjutsuDto);
+        when(personagemMapper.map(taijutsu)).thenReturn(taijutsuDto);
 
         Page<ResponsePersonagemDto> result = personagemService.findAll(pageable);
 
@@ -58,7 +75,13 @@ public class PersonagemServiceTest {
 
     @Test
     void testFindPersonagemById_Success() {
+        ResponsePersonagemDto resDto = new ResponsePersonagemDto(
+                ninjutsu.getId(), ninjutsu.getNome(), ninjutsu.getVida(),
+                ninjutsu.getChakra(), ninjutsu.getJutsus()
+        );
+
         when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninjutsu));
+        when(personagemMapper.map(ninjutsu)).thenReturn(resDto);
 
         ResponsePersonagemDto result = personagemService.findPersonagemById(1L);
 
@@ -84,6 +107,7 @@ public class PersonagemServiceTest {
                 .vida(dto.vida()).chakra(dto.chakra()).jutsus(dto.jutsus()).build();
 
         when(personagemRepository.save(auxNinja)).thenReturn(ninjutsu);
+        when(personagemMapper.map(ninjutsu)).thenReturn(ninjutsuDto);
 
         ResponsePersonagemDto result = personagemService.createPersonagem(dto);
 
@@ -105,6 +129,7 @@ public class PersonagemServiceTest {
                 .vida(dto.vida()).chakra(dto.chakra()).jutsus(dto.jutsus()).build();
 
         when(personagemRepository.save(auxNinja)).thenReturn(genjutsu);
+        when(personagemMapper.map(genjutsu)).thenReturn(genjutsuDto);
 
         ResponsePersonagemDto result = personagemService.createPersonagem(dto);
 
@@ -125,6 +150,7 @@ public class PersonagemServiceTest {
                 .vida(dto.vida()).chakra(dto.chakra()).jutsus(dto.jutsus()).build();
 
         when(personagemRepository.save(auxNinja)).thenReturn(taijutsu);
+        when(personagemMapper.map(taijutsu)).thenReturn(taijutsuDto);
 
         ResponsePersonagemDto result = personagemService.createPersonagem(dto);
 
@@ -146,8 +172,14 @@ public class PersonagemServiceTest {
                         .vida(100).chakra(100)
                         .jutsus(jutsus).build();
 
+        ResponsePersonagemDto resDto = ResponsePersonagemDto.builder()
+                .id(ninja.getId()).nome(ninja.getNome()).vida(ninja.getVida())
+                .chakra(ninja.getChakra()).jutsus(ninja.getJutsus()).build();
+
         when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninja));
         when(personagemRepository.save(ninja)).thenReturn(ninja);
+        when(personagemMapper.map(ninja)).thenReturn(resDto);
+
 
         ResponsePersonagemDto result = personagemService.aprenderJutsu(1L, dto);
 
@@ -193,8 +225,8 @@ public class PersonagemServiceTest {
     @Test
     void testUpdatePersonagem_Success() {
         RequestPersonagemDto dto = RequestPersonagemDto.builder()
-                .nome("Sasuke Uchiha")
-                .vida(200).jutsus(Map.of("Chidori", 20, "Kirin", 40)).especialidade("ninjutsu").build();
+                .nome("Sasuke Uchiha").vida(200).chakra(100)
+                .jutsus(Map.of("Chidori", 20, "Kirin", 40)).especialidade("ninjutsu").build();
 
         NinjaDeNinjutsu auxNinja = NinjaDeNinjutsu.builder()
                 .id(1L).nome(dto.nome())
@@ -202,8 +234,13 @@ public class PersonagemServiceTest {
 
         ninjutsu.setVida(dto.vida());
 
+        ResponsePersonagemDto resDto = ResponsePersonagemDto.builder()
+                .id(ninjutsu.getId()).vida(ninjutsu.getVida()).nome(ninjutsu.getNome())
+                .chakra(ninjutsu.getChakra()).jutsus(ninjutsu.getJutsus()).build();
+
         when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninjutsu));
         when(personagemRepository.save(auxNinja)).thenReturn(ninjutsu);
+        when(personagemMapper.map(ninjutsu)).thenReturn(resDto);
 
         ResponsePersonagemDto result = personagemService.updatePersonagem(1L, dto);
 
@@ -227,7 +264,7 @@ public class PersonagemServiceTest {
 
         personagemService.deletePersonagem(1L);
 
-        verify(personagemRepository).deleteById(1L);
+        verify(personagemRepository).delete(ninjutsu);
     }
 
     @Test

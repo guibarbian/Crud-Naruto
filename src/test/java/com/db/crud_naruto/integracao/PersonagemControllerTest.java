@@ -45,6 +45,7 @@ public class PersonagemControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        personagemRepository.deleteAll();
 
         RegisterDTO registerDTO = RegisterDTO.builder()
                 .nome("Naruto")
@@ -106,8 +107,7 @@ public class PersonagemControllerTest {
                         .param("size", "10")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].nome").value("Naruto Uzumaki"))
-                .andExpect(jsonPath(("$.content[1].nome")).value("Sasuke Uchiha"));
+                .andExpect(jsonPath("$.content[0].nome").value("Sasuke Uchiha"));
     }
 
 

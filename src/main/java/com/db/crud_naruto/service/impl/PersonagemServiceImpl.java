@@ -5,6 +5,7 @@ import com.db.crud_naruto.DTO.personagem.RequestPersonagemDto;
 import com.db.crud_naruto.DTO.personagem.ResponsePersonagemDto;
 import com.db.crud_naruto.exceptions.BadRequestException;
 import com.db.crud_naruto.exceptions.NotFoundException;
+import com.db.crud_naruto.mapper.PersonagemMapper;
 import com.db.crud_naruto.model.NinjaDeGenjutsu;
 import com.db.crud_naruto.model.NinjaDeNinjutsu;
 import com.db.crud_naruto.model.NinjaDeTaijutsu;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -29,26 +31,21 @@ import java.util.Optional;
 public class PersonagemServiceImpl implements PersonagemService {
 
     private final PersonagemRepository personagemRepository;
+    private final PersonagemMapper personagemMapper;
 
     @Override
     public Page<ResponsePersonagemDto> findAll(Pageable pageable) {
         log.info("Buscando todos os personagens - Página: {}", pageable.getPageNumber());
         Page<Personagem> personagensPage = personagemRepository.findAll(pageable);
-        return personagensPage.map(Personagem::toDto);
+        return personagensPage.map(personagemMapper::map);
     }
 
     @Override
     public ResponsePersonagemDto findPersonagemById(Long charId) {
-        log.info("Buscando personagem com ID: {}", charId);
-        Optional<Personagem> personagem = personagemRepository.findById(charId);
+        Personagem personagem = buscarPersonagem(charId);
 
-        if(personagem.isEmpty()){
-            log.warn("Personagem com ID {} não encontrado", charId);
-            throw new NotFoundException("Personagem não encontrado");
-        }
-
-        log.debug("Personagem encontrado: {}", personagem.get());
-        return personagem.get().toDto();
+        log.debug("Personagem encontrado: {}", personagem);
+        return personagemMapper.map(personagem);
     }
 
     @Override
@@ -68,30 +65,17 @@ public class PersonagemServiceImpl implements PersonagemService {
         novoPersonagem.setNome(dto.nome());
         novoPersonagem.setVida(dto.vida());
         novoPersonagem.setChakra(dto.chakra());
-        Map<String,Integer> jutsus = dto.jutsus();
-
-        if(jutsus.isEmpty()){
-            log.error("Ninja não foi criado pois não possui jutsus");
-            throw new BadRequestException("Ninja deve ter ao menos um Jutsu");
-        }
-
-        novoPersonagem.setJutsus(jutsus);
+        novoPersonagem.setJutsus(dto.jutsus());
 
         Personagem personagemSalvo = personagemRepository.save(novoPersonagem);
         log.info("Personagem criado com ID: {}", personagemSalvo.getId());
 
-        return personagemSalvo.toDto();
+        return personagemMapper.map(personagemSalvo);
     }
 
     @Override
     public ResponsePersonagemDto updatePersonagem(Long charId, @Valid RequestPersonagemDto dto) {
-        log.info("Atualizando personagem com ID: {}", charId);
-        Optional<Personagem> personagemExistente = personagemRepository.findById(charId);
-
-        if(personagemExistente.isEmpty()){
-            log.warn("Personagem com ID {} não encontrado para atualização", charId);
-            throw new NotFoundException("Personagem não encontrado");
-        }
+        Personagem personagem = buscarPersonagem(charId);
 
         Personagem novoPersonagem = switch(dto.especialidade().toLowerCase()){
             case "ninjutsu" -> new NinjaDeNinjutsu();
@@ -107,31 +91,17 @@ public class PersonagemServiceImpl implements PersonagemService {
         novoPersonagem.setNome(dto.nome());
         novoPersonagem.setVida(dto.vida());
         novoPersonagem.setChakra(dto.chakra());
-
-        Map<String,Integer> jutsus = dto.jutsus();
-
-        if(jutsus.isEmpty()){
-            log.error("Ninja não foi atualizado pois não possui jutsus");
-            throw new BadRequestException("Ninja deve ter ao menos um Jutsu");
-        }
-
-        novoPersonagem.setJutsus(jutsus);
+        novoPersonagem.setJutsus(dto.jutsus());
 
         Personagem personagemSalvo = personagemRepository.save(novoPersonagem);
         log.info("Personagem atualizado com sucesso. ID: {}", personagemSalvo.getId());
 
-        return personagemSalvo.toDto();
+        return personagemMapper.map(personagemSalvo);
     }
 
     @Override
     public ResponsePersonagemDto aprenderJutsu(Long charId, @Valid AprenderJutsuDto dto) {
-        log.info("Checando se personagem com id {} existe", charId);
-
-        Personagem personagem = personagemRepository.findById(charId)
-                .orElseThrow(() -> {
-                    log.warn("Personagem com ID {} não encontrado", charId);
-                    return new NotFoundException("Personagem não encontrado");
-                });
+        Personagem personagem = buscarPersonagem(charId);
 
         if (dto.nomeJutsu() == null || dto.dano() == null || dto.dano() <= 0) {
             log.warn("Dados inválidos para aprendizado de jutsu: nome={}, dano={}", dto.nomeJutsu(), dto.dano());
@@ -149,21 +119,26 @@ public class PersonagemServiceImpl implements PersonagemService {
         personagem.setJutsus(jutsus);
 
         log.info("Jutsu '{}' adicionado ao personagem com ID {}", dto.nomeJutsu(), charId);
-        return personagemRepository.save(personagem).toDto();
+        return personagemMapper.map(personagemRepository.save(personagem));
     }
 
 
     @Override
     public void deletePersonagem(Long charId) {
-        log.info("Deletando personagem com ID: {}", charId);
-        Optional<Personagem> personagemExistente = personagemRepository.findById(charId);
+        Personagem personagem = buscarPersonagem(charId);
 
-        if(personagemExistente.isEmpty()){
-            log.warn("Personagem com ID {} não encontrado para exclusão", charId);
-            throw new NotFoundException("Personagem não encontrado");
-        }
-
-        log.info("Personagem com ID {} deletado com sucesso", charId);
-        personagemRepository.deleteById(charId);
+        log.info("Personagem com ID {} deletado com sucesso", personagem.getId());
+        personagemRepository.delete(personagem);
     }
+
+    private Personagem buscarPersonagem(Long charId){
+        log.info("Buscando personagem com ID: {}", charId);
+
+        return personagemRepository.findById(charId)
+                .orElseThrow(() -> {
+                    log.warn("Personagem com ID {} não encontrado", charId);
+                    return new NotFoundException("Personagem não encontrado");
+                });
+    }
+
 }
