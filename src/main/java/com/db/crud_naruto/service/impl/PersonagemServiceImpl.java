@@ -17,12 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Validated
 @Service
@@ -51,21 +49,7 @@ public class PersonagemServiceImpl implements PersonagemService {
     @Override
     public ResponsePersonagemDto createPersonagem(@Valid RequestPersonagemDto dto) {
         log.info("Criando novo personagem: {}", dto.nome());
-        Personagem novoPersonagem = switch(dto.especialidade().toLowerCase()){
-            case "ninjutsu" -> new NinjaDeNinjutsu();
-            case "taijutsu" -> new NinjaDeTaijutsu();
-            case "genjutsu" -> new NinjaDeGenjutsu();
-            default -> {
-                log.error("Especialidade inválida: {}", dto.especialidade());
-                throw new IllegalArgumentException("Especialidade inválida");
-            }
-
-        };
-
-        novoPersonagem.setNome(dto.nome());
-        novoPersonagem.setVida(dto.vida());
-        novoPersonagem.setChakra(dto.chakra());
-        novoPersonagem.setJutsus(dto.jutsus());
+        Personagem novoPersonagem = construirNovoPersonagem(dto);
 
         Personagem personagemSalvo = personagemRepository.save(novoPersonagem);
         log.info("Personagem criado com ID: {}", personagemSalvo.getId());
@@ -77,21 +61,8 @@ public class PersonagemServiceImpl implements PersonagemService {
     public ResponsePersonagemDto updatePersonagem(Long charId, @Valid RequestPersonagemDto dto) {
         Personagem personagem = buscarPersonagem(charId);
 
-        Personagem novoPersonagem = switch(dto.especialidade().toLowerCase()){
-            case "ninjutsu" -> new NinjaDeNinjutsu();
-            case "taijutsu" -> new NinjaDeTaijutsu();
-            case "genjutsu" -> new NinjaDeGenjutsu();
-            default -> {
-                log.error("Especialidade inválida: {}", dto.especialidade());
-                throw new IllegalArgumentException("Especialidade inválida");
-            }
-        };
-
-        novoPersonagem.setId(charId);
-        novoPersonagem.setNome(dto.nome());
-        novoPersonagem.setVida(dto.vida());
-        novoPersonagem.setChakra(dto.chakra());
-        novoPersonagem.setJutsus(dto.jutsus());
+        Personagem novoPersonagem = construirNovoPersonagem(dto);
+        novoPersonagem.setId(personagem.getId());
 
         Personagem personagemSalvo = personagemRepository.save(novoPersonagem);
         log.info("Personagem atualizado com sucesso. ID: {}", personagemSalvo.getId());
@@ -103,17 +74,9 @@ public class PersonagemServiceImpl implements PersonagemService {
     public ResponsePersonagemDto aprenderJutsu(Long charId, @Valid AprenderJutsuDto dto) {
         Personagem personagem = buscarPersonagem(charId);
 
-        if (dto.nomeJutsu() == null || dto.dano() == null || dto.dano() <= 0) {
-            log.warn("Dados inválidos para aprendizado de jutsu: nome={}, dano={}", dto.nomeJutsu(), dto.dano());
-            throw new BadRequestException("Nome do jutsu ou dano inválido");
-        }
+        validaJutsu(dto, personagem);
 
         Map<String, Integer> jutsus = personagem.getJutsus();
-
-        if (jutsus.containsKey(dto.nomeJutsu())) {
-            log.info("Personagem já conhece o jutsu '{}'", dto.nomeJutsu());
-            throw new BadRequestException("Personagem já sabe o jutsu");
-        }
 
         jutsus.put(dto.nomeJutsu(), dto.dano());
         personagem.setJutsus(jutsus);
@@ -139,6 +102,29 @@ public class PersonagemServiceImpl implements PersonagemService {
                     log.warn("Personagem com ID {} não encontrado", charId);
                     return new NotFoundException("Personagem não encontrado");
                 });
+    }
+
+    private void validaJutsu(AprenderJutsuDto dto, Personagem personagem){
+        if(personagem.getJutsus().containsKey(dto.nomeJutsu())){
+            log.info("Personagem já conhece o jutsu '{}'", dto.nomeJutsu());
+            throw new BadRequestException("Personagem já sabe o jutsu");
+        }
+    }
+
+    private Personagem construirNovoPersonagem(RequestPersonagemDto dto){
+        Personagem personagem = switch (dto.especialidade().toLowerCase()) {
+            case "ninjutsu" -> new NinjaDeNinjutsu();
+            case "taijutsu" -> new NinjaDeTaijutsu();
+            case "genjutsu" -> new NinjaDeGenjutsu();
+            default -> throw new IllegalArgumentException("Especialidade inválida");
+        };
+
+        personagem.setNome(dto.nome());
+        personagem.setVida(dto.vida());
+        personagem.setChakra(dto.chakra());
+        personagem.setJutsus(dto.jutsus());
+
+        return personagem;
     }
 
 }
