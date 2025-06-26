@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Batalha", description = "Endpoints para batalha")
 public interface BatalhaController {
@@ -23,5 +24,5 @@ public interface BatalhaController {
                     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
             }
     )
-    ResponseEntity<String> iniciarBatalha(Long ninja1, Long ninja2);
+    ResponseEntity<String> iniciarBatalha(@PathVariable Long ninja1, @PathVariable Long ninja2);
 }
