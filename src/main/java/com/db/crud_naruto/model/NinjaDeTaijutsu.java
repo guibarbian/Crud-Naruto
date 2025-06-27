@@ -24,14 +24,4 @@ public class NinjaDeTaijutsu extends Personagem implements Ninja {
     public String desviar(){
         return this.getNome() + " está desviando usando suas habilidades de Taijutsu";
     }
-
-    @Override
-    public ResponsePersonagemDto toDto() {
-        return ResponsePersonagemDto.builder()
-                .id(this.getId())
-                .nome(this.getNome())
-                .vida(this.getVida())
-                .chakra(this.getChakra())
-                .jutsus(this.getJutsus()).build();
-    }
 }

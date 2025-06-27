@@ -46,6 +46,4 @@ public abstract class Personagem {
             throw new BadRequestException("Ninja já tem esse jutsu!");
         }
     }
-
-    public abstract ResponsePersonagemDto toDto();
 }
