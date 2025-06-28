@@ -15,7 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -96,13 +97,36 @@ class AuthenticationControllerIntegrationTest {
     void deveRetornarErroAoAutenticarUsuarioInexistente() throws Exception {
         AuthenticationDTO authDTO = AuthenticationDTO.builder()
                 .nome("itachi")
-                .senha("sharingan")
+                .senha("sharingan123")
                 .build();
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authDTO)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$").value("Não existe usuário com esse nome"));
+    }
+
+    @Test
+    void deveRetornar400AoLogarComSenhaErrada() throws Exception{
+        RegisterDTO registerDTO = RegisterDTO.builder()
+                .nome("sasuke")
+                .senha("chidori123").build();
+
+        AuthenticationDTO authDTO = AuthenticationDTO.builder()
+                .nome("sasuke")
+                .senha("chidori122").build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerDTO)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").value("Senha incorreta"));
     }
 
     @Test
