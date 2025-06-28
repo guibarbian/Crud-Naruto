@@ -8,8 +8,11 @@ import com.db.crud_naruto.exceptions.BadRequestException;
 import com.db.crud_naruto.model.Usuario;
 import com.db.crud_naruto.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,18 +43,25 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse login(AuthenticationDTO dto) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        dto.nome(),
-                        dto.senha()
-                )
-        );
-
         var person = usuarioRepository.findByNome(dto.nome())
-                .orElseThrow();
-        var jwtToken = tokenService.generateToken(person);
-        return AuthenticationResponse.builder()
-                .token(jwtToken).build();
+                .orElseThrow(() -> {
+                    return new UsernameNotFoundException("Não existe usuário com esse nome");
+                });
+
+        try{
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            dto.nome(),
+                            dto.senha()
+                    )
+            );
+
+            var jwtToken = tokenService.generateToken(person);
+            return AuthenticationResponse.builder()
+                    .token(jwtToken).build();
+        } catch (AuthenticationException e){
+            throw new BadRequestException("Senha incorreta");
+        }
     }
 
 }
