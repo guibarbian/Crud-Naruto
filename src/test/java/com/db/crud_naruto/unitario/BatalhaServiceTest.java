@@ -1,10 +1,12 @@
 package com.db.crud_naruto.unitario;
 
+import com.db.crud_naruto.exceptions.NotFoundException;
 import com.db.crud_naruto.model.NinjaDeGenjutsu;
 import com.db.crud_naruto.model.NinjaDeNinjutsu;
 import com.db.crud_naruto.model.NinjaDeTaijutsu;
 import com.db.crud_naruto.repository.PersonagemRepository;
 import com.db.crud_naruto.service.impl.BatalhaServiceImpl;
+import org.aspectj.weaver.ast.Not;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,5 +82,32 @@ public class BatalhaServiceTest {
         String resultado = batalhaService.iniciarBatalha(1L, 3L);
 
         assertEquals("Fim da batalha! Sasuke Uchiha venceu!", resultado);
+    }
+
+    @Test
+    public void testNaoEncontraDesafiante(){
+        when(personagemRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(NotFoundException.class, () -> {
+            batalhaService.iniciarBatalha(1L, 2L);
+        });
+
+        String message = exception.getMessage();
+
+        assertEquals("Personagem não encontrado", message);
+    }
+
+    @Test
+    public void testNaoEncontraDesafiador(){
+        when(personagemRepository.findById(1L)).thenReturn(Optional.of(ninjutsu));
+        when(personagemRepository.findById(2L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(NotFoundException.class, () -> {
+            batalhaService.iniciarBatalha(1L, 2L);
+        });
+
+        String message = exception.getMessage();
+
+        assertEquals("Personagem não encontrado", message);
     }
 }
