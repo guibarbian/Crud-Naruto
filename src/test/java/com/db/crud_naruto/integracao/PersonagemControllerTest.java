@@ -384,4 +384,22 @@ public class PersonagemControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.aprenderJutsuDto").value("O dano do jutsu deve ser entre 1 e 120"));
     }
+
+    @Test
+    void testCreatePersonagemComDoisValoresNulos() throws Exception {
+        RequestPersonagemDto personagemDto = RequestPersonagemDto.builder()
+                .nome("Naruto Uzumaki")
+                .vida(null)
+                .chakra(null)
+                .jutsus(Map.of("Rasengan", 20, "Kage Bushin no Jutsu", 20))
+                .especialidade("Ninjutsu")
+                .build();
+
+        mockMvc.perform(post(baseUrl)
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(personagemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.requestPersonagemDto").value("Chakra não pode ser nula"));
+    }
 }

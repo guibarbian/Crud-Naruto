@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -153,5 +154,61 @@ class AuthenticationControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(registerDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.registerDTO").value("A senha deve ter entre 6 e 20 caracteres"));
+    }
+
+    @Test
+    void testRegistrarUsuarioComNomeCurto() throws Exception{
+        RegisterDTO registerDTO = RegisterDTO.builder()
+                .nome("sa")
+                .senha("sakura123")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.registerDTO").value("O nome deve ter entre 3 e 20 caracteres"));
+    }
+
+    @Test
+    void testRegistrarUsuarioComSenhaCurta() throws Exception{
+        RegisterDTO registerDTO = RegisterDTO.builder()
+                .nome("Sasuke")
+                .senha("sa")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.registerDTO").value("A senha deve ter entre 6 e 20 caracteres"));
+    }
+
+    @Test
+    void testRegistrarUsuarioComNomeNulo() throws Exception{
+        RegisterDTO registerDTO = RegisterDTO.builder()
+                .nome(null)
+                .senha("sakura123")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.registerDTO").value("O nome é obrigatório"));
+    }
+
+    @Test
+    void testRegistrarUsuarioComSenhaNulo() throws Exception{
+        RegisterDTO registerDTO = RegisterDTO.builder()
+                .nome("Sasuke")
+                .senha(null)
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.registerDTO").value("A senha é obrigatória"));
     }
 }
